@@ -18,8 +18,14 @@ const renderCards = (array) => { //array is taco
 // UPDATE/ADD ITEMS TO CART
 // .findIndex() & (.includes() - string method)
 const toggleCart = (event) => {
-  if (event.target.id.includes("fav-btn")) {
-   console.log('Clicked Fav btn')
+  if (event.target.id.includes("fav-btn")) { 
+    const [, id] = event.target.id.split('--') //split is destructoring
+
+    const index = referenceList.findIndex(item => item.id === Number(id))
+
+    referenceList[index].inCart = !referenceList[index].inCart
+    cartTotal();
+    renderCards(referenceList)
   }
 }
 
@@ -27,7 +33,12 @@ const toggleCart = (event) => {
 // .filter()
 const search = (event) => {
   const eventLC = event.target.value.toLowerCase();
-  console.log(eventLC)
+  const searchResult = referenceList.filter(item => 
+    item.title.toLowerCase().includes(eventLC) ||
+    item.author.toLowerCase().includes(eventLC) ||
+    item.description.toLowerCase().includes(eventLC)
+  )
+  renderCards(searchResult)
 }
 
 // BUTTON FILTER
@@ -73,16 +84,28 @@ const buttonFilter = (event) => {
 }
 
 // CALCULATE CART TOTAL
-// .reduce() & .some()
+// .reduce() & .some() which returns true or false
 const cartTotal = () => {
-  const total = 0
+  const cart = referenceList.filter(item => item.inCart);
+  const total = cart.reduce((value1, value2) => value1 + value2.price, 0);
+  const free = cart.some(item => item.price <= 0);
   document.querySelector("#cartTotal").innerHTML = total.toFixed(2);
+
+  if (free) {
+    document.querySelector('#includes-free').innerHTML = 'INCLUDES FREE ITEMS'
+  } else {
+    document.querySelector('#includes-free').innerHTML = ''
+  }
 }
 
 // RESHAPE DATA TO RENDER TO DOM
-// .map()
+// .map() applies the same logic to whatever data you pass it and also returns a new array. Manipulates data based on OUR determination.
 const productList = () => {
-  return [{ title: "SAMPLE TITLE", price: 45.00, type: "SAMPLE TYPE" }]
+  return referenceList.map(item => ({ 
+    title: item.title, 
+    price: item.price, 
+    type: item.type
+   }))
 }
 
 
